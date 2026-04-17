@@ -1,7 +1,16 @@
 [package]
-name = "natural_breaks"
+name = "natural-breaks"
 version = "0.1.0"
 edition = "2024"
+authors = ["Uditha Gunaratne <gunaratne1996@gmail.com>"]
+description = "Jenks natural breaks classification for optimal partitioning of one-dimensional data into k classes"
+license = "MIT"
+repository = "https://github.com/uratne/natural-breaks"
+readme = "README.md"
+keywords = ["jenks", "natural-breaks", "classification", "clustering", "statistics"]
+categories = ["algorithms", "science"]
+rust-version = "1.85"
+exclude = ["target/", ".git/"]
 
 [dependencies]
 num-traits = "0.2.19"
