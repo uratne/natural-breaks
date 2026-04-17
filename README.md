@@ -1,4 +1,7 @@
-# natural_breaks
+# Natural Breaks
+
+[![Crates.io](https://img.shields.io/crates/v/natural-breaks)](https://crates.io/crates/natural-breaks)
+[![docs.rs](https://docs.rs/natural-breaks/badge.svg)](https://docs.rs/natural-breaks)
 
 A Rust implementation of the **Jenks natural breaks classification** algorithm
 for optimal partitioning of one-dimensional data into `k` classes that minimise
