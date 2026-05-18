@@ -12,7 +12,10 @@ within-class variance (WCSS).
 - Generic over any numeric type that implements `ToPrimitive` (`f64`, `f32`, `i32`, `u64`, etc.)
 - Returns clustered values **or** zero-copy index ranges
 - Built-in sort variants for unsorted input (with NaN detection)
-- Current implementation: **O(kn²)** with an early-exit pruning optimisation
+- Two algorithm implementations:
+  - **O(kn²)** with an early-exit pruning optimisation (`k_n2::KNSquared`)
+  - **O(kn log n)** divide-and-conquer DP (`k_nlogn::KNLogN`)
+- Optional `low-memory` feature: reduces the O(kn log n) variant from O(kn) to O(n) memory at the cost of O(k²n log n) time
 
 ## Quick start
 
@@ -20,7 +23,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-natural_breaks = "0.1"
+natural_breaks = "0.2"
 ```
 
 ### Classify unsorted data
@@ -70,34 +73,55 @@ use natural_breaks::k_n2::KNSquared;
 let clusters = KNSquared::classify(vec![1.0, 2.0, 3.0, 10.0, 11.0, 12.0], 2).unwrap();
 ```
 
-## Algorithm
+```rust
+use natural_breaks::k_nlogn::KNLogN;
+
+let clusters = KNLogN::classify(vec![1.0, 2.0, 3.0, 10.0, 11.0, 12.0], 2).unwrap();
+```
+
+### Low-memory mode
+
+Enable the `low-memory` feature to reduce the O(kn log n) algorithm's memory
+usage from O(kn) to O(n), at the cost of increased time complexity
+(O(k²n log n)):
+
+```toml
+[dependencies]
+natural_breaks = { version = "0.2", features = ["low-memory"] }
+```
+
+## Algorithms
+
+### O(kn²) — `k_n2::KNSquared`
 
 Based on:
 
 > Wang & Song, "Optimal Classification of Quantitative Data",
 > *The R Journal*, Vol. 3/2, December 2011.
-> https://journal.r-project.org/articles/RJ-2011-015/
+> <https://journal.r-project.org/articles/RJ-2011-015/>
 
 This implementation adds an early-exit pruning step that breaks the inner loop
 when the running within-cluster sum of squares already exceeds the current best,
 exploiting the monotonicity of WCSS on sorted data.
 
+### O(kn log n) — `k_nlogn::KNLogN`
+
+Uses the divide-and-conquer DP optimisation exploiting the "no-crossing-paths"
+(monotonicity) property of optimal split points. Based on:
+
+> Hilferink, "Fisher's Natural Breaks Classification — Complexity Proof",
+> Object Vision BV.
+> <https://geodms.nl/docs/fisher%27s-natural-breaks-classification-complexity-proof.html>
+
 ## Roadmap
-
-### O(kn log n)
-
-Next up is an implementation of Fisher's natural breaks with **O(kn log n)**
-complexity. Will be implemented soon. Based on:
-
-> [Fisher's Natural Breaks Classification — Complexity Proof](https://geodms.nl/docs/fisher%27s-natural-breaks-classification-complexity-proof.html)
 
 ### O(kn)
 
-After that, I plan to explore an **O(kn)** algorithm based on:
+I plan to explore an **O(kn)** algorithm based on:
 
 > Xiaolin Song *et al.*, "An optimal-time algorithm for the k-filling problem and its application to the one-dimensional Jenks classification",
 > *Bioinformatics*, Vol. 36, Issue 20, October 2020.
-> https://academic.oup.com/bioinformatics/article/36/20/5027/5866975
+> <https://academic.oup.com/bioinformatics/article/36/20/5027/5866975>
 
 This one still needs investigation and may take some time.
 
@@ -110,4 +134,4 @@ point:
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+MIT — see LICENSE for details.

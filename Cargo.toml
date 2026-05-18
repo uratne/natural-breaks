@@ -1,6 +1,6 @@
 [package]
 name = "natural-breaks"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = ["Uditha Gunaratne <gunaratne1996@gmail.com>"]
 description = "Jenks natural breaks classification for optimal partitioning of one-dimensional data into k classes"
@@ -14,3 +14,6 @@ exclude = ["target/", ".git/"]
 
 [dependencies]
 num-traits = "0.2.19"
+
+[features]
+low-memory = []

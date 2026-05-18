@@ -1,13 +1,6 @@
 use num_traits::ToPrimitive;
 
-use std::any::type_name;
-
-use crate::error::Error;
-
-type ClassifiedResult<T> = Vec<Vec<T>>;
-
-/// A list of half-open index ranges `[start, end)` representing cluster boundaries.
-pub type IndexRanges = Vec<(usize, usize)>;
+use crate::{error::Error, util::validate_and_convert, ClassifiedResult, IndexRanges};
 
 /// O(kn²) natural breaks classifier.
 ///
@@ -20,27 +13,6 @@ pub type IndexRanges = Vec<(usize, usize)>;
 /// when the running within-cluster sum of squares already exceeds the current
 /// best, exploiting the monotonicity of WCSS on sorted data.
 pub struct KNSquared {}
-
-/// Validates inputs and converts the data slice to `f64`.
-///
-/// Returns an error if `k` is zero, if `n < k`, or if any element
-/// cannot be losslessly cast to `f64`.
-fn validate_and_convert<T: ToPrimitive>(data: &[T], k: usize) -> Result<Vec<f64>, Error> {
-    let n = data.len();
-    let t_type = type_name::<T>();
-
-    if k == 0 {
-        return Err(Error::ZeroClusters);
-    }
-
-    if n < k {
-        return Err(Error::NLessThanKError);
-    }
-
-    data.iter()
-        .map(|t| t.to_f64().ok_or(Error::CastError(t_type.to_string())))
-        .collect()
-}
 
 /// Fills the dynamic-programming tables and returns the backtrack matrix.
 ///
@@ -75,8 +47,8 @@ fn compute_dp(converted_data: &[f64], k: usize) -> Vec<Vec<usize>> {
     }
 
     // Fill columns m = 1..k-1
-    for m in 1..k {
-        for i in m..n {
+    for m in 1..k { //O(kn^2)
+        for i in m..n { //O(n^2)
             // Try putting data[j..=i] into the m-th cluster.
             // Walk j backwards from i so we can incrementally compute the
             // WCSS of the right-hand cluster.
@@ -92,7 +64,7 @@ fn compute_dp(converted_data: &[f64], k: usize) -> Vec<Vec<usize>> {
                 b = i;
             }
 
-            for j in (m..i).rev() {
+            for j in (m..i).rev() { //O(n)
                 let count = i - j + 1;
                 d_xi_2_xj = d_next(d_xi_2_xj, count, converted_data[j], mu_prev);
                 mu_prev = mu_next(converted_data[j], count, mu_prev);
